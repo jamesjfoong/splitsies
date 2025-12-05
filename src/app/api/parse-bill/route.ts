@@ -8,6 +8,7 @@ import {
   isLikelyBot,
   isValidOrigin,
 } from "@/lib/security/rate-limit";
+import { parseReceiptResponseSafe } from "@/lib/schemas/receipt";
 
 // Initialize Gemini AI
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
@@ -151,73 +152,31 @@ OUTPUT SCHEMA (strict - no deviations allowed):
       );
     }
 
-    const parsed = JSON.parse(jsonMatch[0]);
+    // Parse and validate with Zod schema (handles all sanitization)
+    const rawParsed = JSON.parse(jsonMatch[0]);
+    const validated = parseReceiptResponseSafe(rawParsed);
 
-    // === OUTPUT VALIDATION (Defense against prompt injection) ===
-    // Validate and sanitize the parsed output to ensure it matches expected schema
-
-    // Sanitize string to prevent XSS and limit length
-    const sanitizeString = (str: unknown, maxLen = 100): string => {
-      if (typeof str !== "string") return "";
-      return str.slice(0, maxLen).replace(/[<>]/g, "");
-    };
-
-    // Validate currency code (ISO 4217 - 3 uppercase letters)
-    const validateCurrency = (currency: unknown): string => {
-      if (typeof currency !== "string") return "USD";
-      const cleaned = currency.toUpperCase().slice(0, 3);
-      return /^[A-Z]{3}$/.test(cleaned) ? cleaned : "USD";
-    };
-
-    // Validate number
-    const validateNumber = (num: unknown): number => {
-      const n = Number(num);
-      return isFinite(n) && n >= 0 ? n : 0;
-    };
-
-    // Validate items array (limit to 100 items max)
-    const validateItems = (
-      items: unknown
-    ): { name: string; price: number; quantity: number }[] => {
-      if (!Array.isArray(items)) return [];
-      return items.slice(0, 100).map((item) => ({
-        name: sanitizeString(item?.name, 200) || "Unknown Item",
-        price: validateNumber(item?.price),
-        quantity: Math.max(
-          1,
-          Math.min(100, Math.floor(validateNumber(item?.quantity)) || 1)
-        ),
-      }));
-    };
-
-    // Transform to our format with validation
-    const validatedItems = validateItems(parsed.items);
-    const billItems: BillItem[] = validatedItems.map((item, index) => ({
+    // Transform to our BillItem format
+    const billItems: BillItem[] = validated.items.map((item, index) => ({
       id: `item-${Date.now()}-${index}`,
       name: item.name,
       price: item.price,
       quantity: item.quantity,
       assignedTo: [],
       splitType: SplitType.Individual,
-      confidence: Math.min(
-        1,
-        Math.max(0, validateNumber(parsed.confidence) || 0.8)
-      ),
+      confidence: validated.confidence,
       manuallyEdited: false,
     }));
 
     const parseResult: ParseResult = {
-      merchantName: sanitizeString(parsed.merchantName, 200),
+      merchantName: validated.merchantName,
       items: billItems,
-      subtotal: validateNumber(parsed.subtotal),
-      tax: validateNumber(parsed.tax),
-      tip: validateNumber(parsed.tip),
-      total: validateNumber(parsed.total),
-      currency: validateCurrency(parsed.currency),
-      confidence: Math.min(
-        1,
-        Math.max(0, validateNumber(parsed.confidence) || 0.8)
-      ),
+      subtotal: validated.subtotal,
+      tax: validated.tax,
+      tip: validated.tip,
+      total: validated.total,
+      currency: validated.currency,
+      confidence: validated.confidence,
     };
 
     return NextResponse.json(parseResult);
