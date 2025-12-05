@@ -29,7 +29,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         } else {
           root.classList.remove("dark");
         }
-      } catch (e) {
+      } catch {
         // Ignore parse errors
       }
     }

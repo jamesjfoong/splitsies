@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import Image from "next/image";
 import { Camera, Upload, X, Check } from "lucide-react";
 import { useDropzone } from "react-dropzone";
 import { toast } from "sonner";
@@ -193,10 +194,13 @@ export function CameraCapture() {
 
             {/* Image Preview */}
             <div className="flex-1 overflow-auto p-4 sm:p-6 bg-gray-50 dark:bg-gray-900/50">
-              <img
+              <Image
                 src={preview}
                 alt="Receipt preview"
+                width={800}
+                height={1200}
                 className="w-full h-auto rounded-lg shadow-lg"
+                unoptimized
               />
             </div>
 

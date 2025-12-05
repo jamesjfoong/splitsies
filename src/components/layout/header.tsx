@@ -19,7 +19,7 @@ export function Header() {
               Splitsies
             </h1>
             <p className="text-xs text-gray-600 dark:text-gray-400">
-              Let's do splitsies!
+              Let&apos;s do splitsies!
             </p>
           </div>
         </div>
