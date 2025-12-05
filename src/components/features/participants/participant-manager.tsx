@@ -67,7 +67,7 @@ export function ParticipantManager() {
       <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
         <Users className="w-6 h-6 sm:w-8 sm:h-8 text-primary-600 dark:text-primary-400" />
         <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
-          Who's Splitting?
+          Who&apos;s Splitting?
         </h2>
       </div>
 
@@ -81,7 +81,7 @@ export function ParticipantManager() {
           type="text"
           value={nameInput}
           onChange={(e) => setNameInput(e.target.value)}
-          onKeyPress={handleKeyPress}
+          onKeyDown={handleKeyPress}
           placeholder="Enter name..."
           className="flex-1 px-3 sm:px-4 py-2 sm:py-3 rounded-lg border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:border-primary-500 focus:outline-none text-sm sm:text-base"
         />

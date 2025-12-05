@@ -135,13 +135,11 @@ Rules:
 - If you cannot parse the receipt, return confidence: 0`;
 
     // Call Gemini API
-    console.log("Calling Gemini 2.0 Flash API...");
+
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
     const result = await model.generateContent([prompt, imagePart]);
     const response = result.response;
     const text = response.text();
-
-    console.log("Gemini response received");
 
     // Extract JSON from response (sometimes wrapped in markdown)
     const jsonMatch = text.match(/\{[\s\S]*\}/);
