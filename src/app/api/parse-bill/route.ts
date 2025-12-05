@@ -126,6 +126,15 @@ OUTPUT SCHEMA (strict - no deviations allowed):
 - Extract ALL line items with names and prices
 - Default quantity to 1 if not shown
 - Detect currency from symbols: Rp/IDR, $/USD, €/EUR, £/GBP, ¥/JPY
+
+CRITICAL - NUMBER FORMAT RULES:
+- Indonesian Rupiah (IDR): periods are THOUSAND separators, NOT decimals!
+  - "45.000" means 45000 (forty-five thousand), NOT 45
+  - "1.250.000" means 1250000 (one million two hundred fifty thousand)
+  - "Rp 45.000" = 45000, "Rp 1.500" = 1500
+- USD/EUR/GBP: periods ARE decimals (10.50 = ten dollars fifty cents)
+- Always output the FULL numeric value without separators
+
 - Set confidence based on image clarity (0-1)
 - If NOT a valid receipt, return: {"merchantName":"","items":[],"subtotal":0,"tax":0,"tip":0,"total":0,"currency":"USD","confidence":0}
 - Output ONLY the JSON object, no markdown, no explanation`;
