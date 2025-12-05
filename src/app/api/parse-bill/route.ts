@@ -2,12 +2,66 @@ import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import type { ParseResult, BillItem } from "@/types";
 import { SplitType } from "@/types";
+import {
+  checkRateLimit,
+  getClientIP,
+  isLikelyBot,
+  isValidOrigin,
+} from "@/lib/security/rate-limit";
 
 // Initialize Gemini AI
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
+// Allowed origins (add your Vercel domain after deployment)
+const ALLOWED_ORIGINS = [
+  "localhost",
+  "127.0.0.1",
+  "splitsies.vercel.app", // Update with your actual Vercel URL
+  process.env.NEXT_PUBLIC_APP_URL || "",
+];
+
 export async function POST(request: NextRequest) {
   try {
+    // === SECURITY CHECKS ===
+
+    // 1. Bot Detection
+    if (isLikelyBot(request)) {
+      console.warn("Bot detected:", request.headers.get("user-agent"));
+      return NextResponse.json({ error: "Access denied" }, { status: 403 });
+    }
+
+    // 2. Origin Validation (CSRF protection)
+    if (!isValidOrigin(request, ALLOWED_ORIGINS)) {
+      console.warn("Invalid origin:", request.headers.get("origin"));
+      return NextResponse.json(
+        { error: "Invalid request origin" },
+        { status: 403 }
+      );
+    }
+
+    // 3. Rate Limiting
+    const clientIP = getClientIP(request);
+    const rateLimit = checkRateLimit(clientIP);
+
+    if (!rateLimit.allowed) {
+      console.warn("Rate limit exceeded for IP:", clientIP);
+      return NextResponse.json(
+        {
+          error: "Too many requests. Please try again later.",
+          retryAfter: Math.ceil(rateLimit.resetIn / 1000),
+        },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(Math.ceil(rateLimit.resetIn / 1000)),
+            "X-RateLimit-Remaining": "0",
+          },
+        }
+      );
+    }
+
+    // === END SECURITY CHECKS ===
+
     const formData = await request.formData();
     const file = formData.get("image") as File;
 
