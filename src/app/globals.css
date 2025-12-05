@@ -1,26 +1,182 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* Configure dark mode variant for manual toggling */
+@custom-variant dark (&:where(.dark, .dark *));
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Mobile-optimized base styles */
+html {
+  scroll-behavior: smooth;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  /* Safe area insets for notched devices */
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  /* Prevent pull-to-refresh on PWA */
+  overscroll-behavior-y: contain;
+  /* Improve text rendering */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Prevent zoom on input focus (iOS) */
+@supports (-webkit-touch-callout: none) {
+  input,
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+
+/* Theme configuration using CSS variables */
+@theme {
+  /* Custom primary colors */
+  --color-primary-50: oklch(0.97 0.01 264);
+  --color-primary-100: oklch(0.95 0.02 264);
+  --color-primary-200: oklch(0.88 0.05 264);
+  --color-primary-300: oklch(0.78 0.11 264);
+  --color-primary-400: oklch(0.71 0.2 269);
+  --color-primary-500: oklch(0.65 0.25 269);
+  --color-primary-600: oklch(0.56 0.24 269);
+  --color-primary-700: oklch(0.48 0.2 269);
+  --color-primary-800: oklch(0.4 0.16 269);
+  --color-primary-900: oklch(0.34 0.13 269);
+
+  /* Gray colors for dark mode */
+  --color-gray-50: oklch(0.98 0 0);
+  --color-gray-100: oklch(0.96 0 0);
+  --color-gray-200: oklch(0.92 0 0);
+  --color-gray-300: oklch(0.83 0 0);
+  --color-gray-400: oklch(0.68 0 0);
+  --color-gray-500: oklch(0.53 0 0);
+  --color-gray-600: oklch(0.42 0 0);
+  --color-gray-700: oklch(0.32 0 0);
+  --color-gray-800: oklch(0.22 0 0);
+  --color-gray-900: oklch(0.13 0 0);
+
+  /* Blue colors for gradients */
+  --color-blue-100: oklch(0.94 0.04 240);
+  --color-blue-600: oklch(0.55 0.18 250);
+
+  /* Red colors for errors */
+  --color-red-50: oklch(0.97 0.02 25);
+  --color-red-200: oklch(0.87 0.13 25);
+  --color-red-400: oklch(0.68 0.2 25);
+  --color-red-600: oklch(0.55 0.22 25);
+  --color-red-800: oklch(0.42 0.18 25);
+  --color-red-900: oklch(0.32 0.15 25);
+
+  /* Green colors */
+  --color-green-50: oklch(0.96 0.04 145);
+  --color-green-400: oklch(0.75 0.15 145);
+  --color-green-600: oklch(0.55 0.18 145);
+
+  /* Orange colors */
+  --color-orange-50: oklch(0.96 0.05 45);
+  --color-orange-400: oklch(0.72 0.18 45);
+  --color-orange-600: oklch(0.6 0.18 45);
+  --color-orange-900: oklch(0.35 0.12 45);
+
+  /* Purple colors */
+  --color-purple-50: oklch(0.96 0.04 295);
+  --color-purple-400: oklch(0.68 0.2 295);
+  --color-purple-900: oklch(0.32 0.15 295);
+
+  /* Yellow colors */
+  --color-yellow-500: oklch(0.8 0.15 95);
+
+  /* Font family */
+  --font-sans: "Inter", system-ui, sans-serif;
+}
+
+/* Custom utility classes */
+@layer components {
+  .glass {
+    background-color: rgb(255 255 255 / 0.8);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgb(229 231 235 / 0.2);
+  }
+
+  :is(.dark .glass) {
+    background-color: rgb(17 24 39 / 0.8);
+    border-color: rgb(55 65 81 / 0.2);
+  }
+
+  .btn-primary {
+    background: linear-gradient(
+      to right,
+      var(--color-primary-500),
+      var(--color-blue-600)
+    );
+    color: white;
+    font-weight: 500;
+    padding: 0.625rem 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+
+  .btn-primary:hover {
+    background: linear-gradient(
+      to right,
+      var(--color-primary-600),
+      rgb(37 99 235)
+    );
+    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+  }
+
+  .btn-primary:active {
+    transform: scale(0.95);
+  }
+
+  .btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .btn-primary:disabled:hover {
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  }
+
+  .btn-secondary {
+    background-color: rgb(255 255 255 / 0.8);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgb(229 231 235 / 0.2);
+    color: rgb(17 24 39);
+    padding: 0.625rem 1rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  :is(.dark .btn-secondary) {
+    background-color: rgb(31 41 55 / 0.9);
+    border-color: rgb(55 65 81 / 0.2);
+    color: white;
+  }
+
+  .btn-secondary:hover {
+    background-color: rgb(255 255 255 / 0.9);
+  }
+
+  :is(.dark .btn-secondary:hover) {
+    background-color: rgb(31 41 55 / 0.95);
+  }
+
+  .btn-secondary:active {
+    transform: scale(0.95);
+  }
+
+  /* Responsive sizing for buttons */
+  @media (min-width: 640px) {
+    .btn-primary,
+    .btn-secondary {
+      padding: 0.75rem 1.5rem;
+    }
+  }
 }
