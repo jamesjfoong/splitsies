@@ -148,7 +148,7 @@ OUTPUT SCHEMA (strict - no deviations allowed):
 
     // Call Gemini API with system instruction for added security
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash",
+      model: "gemini-2.5-flash-live",
       systemInstruction: systemInstruction,
     });
     const result = await model.generateContent([extractionPrompt, imagePart]);
